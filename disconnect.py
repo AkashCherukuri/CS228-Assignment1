@@ -6,9 +6,12 @@ def map_to_int(i):
 	#Will cause ValueError if you're not careful!
 	return mp.index(i)
 
-def find_minimal(graph, s, t):
+def find_minimal(graph, start, t):
 	#Constraints list
 	constr = []
+
+	#Solver
+	s = Optimize()
 
 	#Create mapping
 	for edg in graph:
@@ -29,17 +32,23 @@ def find_minimal(graph, s, t):
 	c = []
 	for i in range(sz):
 		a.append([])
+		c.append([])
 		for j in range(sz):
 			a[i].append(Bool("a"+str(i)+str(j)))
 			c[i].append(Bool("c"+str(i)+str(j)))
 
 	#Assign Values for edge variables
-	for edg in graph:
-		i = map_to_int(edg[0])
-		j = map_to_int(edg[1])
+	for i in range(sz):
+		for j in range(sz):
+			if (mp[i],mp[j]) in graph or (mp[j],mp[i]) in graph:
+				#print("Found Edge: ",i, j)
+				#print("Corresponds to:",mp[i],mp[j],"\n")
+				#Add soft constraint over present edges
+				s.add_soft(a[i][j])
 
-		#TODO: Add present edges as soft constr and non-present edges as hard constr
-		#constr.append(a[i][j])
+			elif i != j:
+				#Add hard constraint over edges not present
+				constr.append(Not(a[i][j]))
 
 	for i in range(sz):
 		for j in range(sz):
@@ -49,6 +58,7 @@ def find_minimal(graph, s, t):
 
 			#Generic
 			constr.append(c[i][i])
+			constr.append(a[i][i])
 
 			#Connectivity
 			for k in range(sz):
@@ -58,6 +68,24 @@ def find_minimal(graph, s, t):
 			constr.append(Implies(a[i][j], c[i][j]))
 
 	#Question's constraint
-	s_map = map_to_int(s)
+	s_map = map_to_int(start)
 	t_map = map_to_int(t)
 	constr.append(Not(c[s_map][t_map]))
+
+	#Add all these constraints into the solver
+	s.add(And( constr ))
+
+	#Problem need not always be sat, if s,t are the same point
+	s.check()
+	mod = s.model()
+
+	answer = []
+
+	for edg in graph:
+		i = map_to_int(edg[0])
+		j = map_to_int(edg[1])
+
+		if not mod[a[i][j]]:
+			answer.append(edg)
+
+	return len(answer)
