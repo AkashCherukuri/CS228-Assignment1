@@ -20,8 +20,8 @@ import mastermind
 
 # we randomly choose number of colors and length of sequence
 import random
-n= random.randint(8, 12)
-k= random.randint(3, 7)
+n= 3
+k= 2
 
 # two modes of testing
 # play with self or play with a human
