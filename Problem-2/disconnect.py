@@ -35,27 +35,30 @@ def find_minimal(graph, start, t):
 
 	#To make efficient, use distinct property
 	mp.sort()
+	if t < start:
+		tmp = start
+		start = t
+		t = tmp
 
 	#Declare variables
 	sz = len(mp)
-	a = []
 	c = []
 	for i in range(sz):
-		a.append([])
 		c.append([])
 		for j in range(sz):
-			a[i].append([])
 			c[i].append([])
 
+
+	s_map = map_to_int(start)
+	t_map = map_to_int(t)
+			
 	for i in range(sz):
-		for j in range(sz):
+		for j in range(i+1,sz):
 			#Have only half of the square, assign only edge vars instead of all
-			if i<j:
-				c[i][j] = (Bool("c"+str(i)+str(j)))
-				if ind_in_gr(i,j,graph):
-					a[i][j] = (Bool("a"+str(i)+str(j)))
-					#Add Soft_Constraint
-					s.add_soft(a[i][j])
+			c[i][j] = (Bool("c"+str(i)+str(j)))
+			if ind_in_gr(i,j,graph):
+				#Add Soft_Constraint
+				s.add_soft(c[i][j])
 
 
 	#Assign Values for edge variables
@@ -72,35 +75,27 @@ def find_minimal(graph, start, t):
 	# 			constr.append(Not(a[i][j]))
 
 	for i in range(sz):
-		for j in range(sz):
-			#Commutativity Constraint redundant as i<j
-			# constr.append(And(Implies(a[i][j], a[j][i]), Implies(a[j][i], a[i][j])))
-			# constr.append(And(Implies(c[i][j], c[j][i]), Implies(c[j][i], c[i][j])))
-
-			# Generic redundant as i<j
-			# constr.append(c[i][i])
-			# constr.append(a[i][i])
-
-			if i<j:
-				#Connectivity
-				for k in range(sz):
-					# print(i,k,j)
-					# print(c[i][j], c[i][k], c[k][j])
-					if k<i:
-						constr.append(Implies(And(c[k][i], c[k][j]),c[i][j]))
-					elif i<k and k<j:
-						constr.append(Implies(And(c[i][k], c[k][j]),c[i][j]))
-					elif j<k:	
-						constr.append(Implies(And(c[i][k], c[j][k]),c[i][j]))
-
-				#Adjacent implies connectivity
-				if ind_in_gr(i,j,graph):
-					#print("adj: ",i,j,a[i][j],c[i][j])
-					constr.append(Implies(a[i][j], c[i][j]))
+		#Connectivity
+		for k in range(sz):
+			# print(i,k,j)
+			# print(c[i][j], c[i][k], c[k][j])
+			if s_map<i:
+				if k<s_map:
+					constr.append(Implies(And(c[k][s_map], c[k][i]),c[s_map][i]))
+				elif s_map<k and k<i:
+					constr.append(Implies(And(c[s_map][k], c[k][i]),c[s_map][i]))
+				elif i<k:	
+					constr.append(Implies(And(c[s_map][k], c[i][k]),c[s_map][i]))
+			elif s_map>i:
+				if k<i:
+					constr.append(Implies(And(c[k][i], c[k][s_map]),c[i][s_map]))
+				elif i<k and k<s_map:
+					constr.append(Implies(And(c[i][k], c[k][s_map]),c[i][s_map]))
+				elif s_map<k:	
+					constr.append(Implies(And(c[i][k], c[s_map][k]),c[i][s_map]))
+				
 
 	#Question's constraint
-	s_map = map_to_int(start)
-	t_map = map_to_int(t)
 	constr.append(Not(c[s_map][t_map]))
 
 	#Add all these constraints into the solver
@@ -116,7 +111,7 @@ def find_minimal(graph, start, t):
 		i = map_to_int(edg[0])
 		j = map_to_int(edg[1])
 
-		if not mod[a[i][j]]:
+		if not mod[c[i][j]]:
 			answer.append(edg)
 
 	return len(answer)
