@@ -48,16 +48,19 @@ def put_first_player_response(red,white):
             if code[i] not in colors:
                 colors.append(code[i])
 
-        print(colors)
+        # print(colors)
 
         s.add(Sum([If(Bool("A[%s][%s]" %(i,code[i])),1,0) for i in range(len_of_code)]) == red)
-        s.add(Sum([If(Bool("A[%s][%s]" %(i, j)),1,0) for i in range(len_of_code) for j in colors]) == white + red)
+        s.add(Sum([If(Bool("A[%s][%s]" %(i, j)),1,0) for i in range(len_of_code) for j in colors]) >= white + red)
 
 
 def get_second_player_move():
     #have to predict next move based on the constraints
     print(s.check())
     mod = s.model()
+    if s.check() == sat:
+        print(mod)
+    
     # print(mod)
     l = len(mod)
     # print("Length: ", l)
