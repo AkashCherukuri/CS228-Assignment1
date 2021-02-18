@@ -53,6 +53,15 @@ def put_first_player_response(red,white):
 
 def get_second_player_move():
     #have to predict next move based on the constraints
+    gcode = [-1] * len_of_code
+    if(len(guess_codes) == 0):
+        for i in range(len_of_code):
+            if(i<len_of_code/2):
+                gcode[i] = 0
+            else:
+                gcode[i] = 1
+        guess_codes.append(gcode)
+        return gcode
     s.check()
     mod = s.model()
     # if s.check() == sat:
@@ -61,7 +70,6 @@ def get_second_player_move():
     # print(mod)
     l = len(mod)
     # print("Length: ", l)
-    gcode = [-1] * len_of_code
     #print(len(gcode))
     for i in range(l):
         if(mod[mod[i]]):
