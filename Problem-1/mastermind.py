@@ -12,6 +12,7 @@ def initialize(n,k):
     num_of_colors = n
     global len_of_code
     len_of_code = k
+    print("colors", n, "length of code", k)
     #A[i][j] is an INT which can take either 0/1. A[i][j] is 1 if the i'th position has the j'th color, 0 otherwise.
     for i in range(k):
         lst = []
@@ -42,17 +43,24 @@ def put_first_player_response(red,white):
         #A = [ [  Int("a_%s_%s" % (i, j)) for j in range(num_of_colors) ] 
       #for i in range(len_of_code) ]
         #s.add(rwsum == Int(red+white))
+        colors=[]
+        for i in range(len_of_code):
+            if code[i] not in colors:
+                colors.append(code[i])
+
+        print(colors)
+
         s.add(Sum([If(Bool("A[%s][%s]" %(i,code[i])),1,0) for i in range(len_of_code)]) == red)
-        s.add(Sum([If(Bool("A[%s][%s]" %(j, code[i])),1,0) for j in range(len_of_code) for i in range(len_of_code)]) == white + red)
+        s.add(Sum([If(Bool("A[%s][%s]" %(i, j)),1,0) for i in range(len_of_code) for j in colors]) == white + red)
 
 
 def get_second_player_move():
     #have to predict next move based on the constraints
     print(s.check())
     mod = s.model()
-    print(mod)
+    # print(mod)
     l = len(mod)
-    print("Length: ", l)
+    # print("Length: ", l)
     gcode = [-1] * len_of_code
     #print(len(gcode))
     #Problem here in string decomp.
@@ -64,7 +72,6 @@ def get_second_player_move():
             elif(len(st) == 8):
                 gcode[int(st[2])] = int(st[5] + st[6])
             
-    print(gcode)
+    # print("guessed",gcode)
     guess_codes.append(gcode)
     return gcode
-
