@@ -1,4 +1,3 @@
-
 from z3 import *
 import random
 
@@ -41,10 +40,6 @@ def put_first_player_response(red,white):
     if(red == len_of_code):
         return
     else:
-        #s.add(Sum([If(Bool('b%i' % i),1,0) for i in range(200)]) <= 10)
-        #A = [ [  Int("a_%s_%s" % (i, j)) for j in range(num_of_colors) ] 
-      #for i in range(len_of_code) ]
-        #s.add(rwsum == Int(red+white))
         colors=[]
         for i in range(len_of_code):
             if code[i] not in colors:
@@ -58,7 +53,7 @@ def put_first_player_response(red,white):
 
 def get_second_player_move():
     #have to predict next move based on the constraints
-    # print(s.check())
+    s.check()
     mod = s.model()
     # if s.check() == sat:
     #     print(mod)
