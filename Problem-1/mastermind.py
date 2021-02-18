@@ -1,10 +1,12 @@
+
 from z3 import *
+import random
 
 num_of_colors = 0
 len_of_code = 0
 guess_codes = []
 hard_const = []
-s = Solver()
+s = Optimize()
 A = []
 
 def initialize(n,k):
@@ -12,7 +14,7 @@ def initialize(n,k):
     num_of_colors = n
     global len_of_code
     len_of_code = k
-    print("colors", n, "length of code", k)
+    # print("colors", n, "length of code", k)
     #A[i][j] is an INT which can take either 0/1. A[i][j] is 1 if the i'th position has the j'th color, 0 otherwise.
     for i in range(k):
         lst = []
@@ -50,23 +52,22 @@ def put_first_player_response(red,white):
 
         # print(colors)
 
-        s.add(Sum([If(Bool("A[%s][%s]" %(i,code[i])),1,0) for i in range(len_of_code)]) == red)
-        s.add(Sum([If(Bool("A[%s][%s]" %(i, j)),1,0) for i in range(len_of_code) for j in colors]) >= white + red)
+        s.add_soft(Sum([If(Bool("A[%s][%s]" %(i,code[i])),1,0) for i in range(len_of_code)]) == red)
+        s.add_soft(Sum([If(Bool("A[%s][%s]" %(i, j)),1,0) for i in range(len_of_code) for j in colors]) >= white + red)
 
 
 def get_second_player_move():
     #have to predict next move based on the constraints
-    print(s.check())
+    # print(s.check())
     mod = s.model()
-    if s.check() == sat:
-        print(mod)
+    # if s.check() == sat:
+    #     print(mod)
     
     # print(mod)
     l = len(mod)
     # print("Length: ", l)
     gcode = [-1] * len_of_code
     #print(len(gcode))
-    #Problem here in string decomp.
     for i in range(l):
         if(mod[mod[i]]):
             st = str(mod[i])
@@ -75,6 +76,5 @@ def get_second_player_move():
             elif(len(st) == 8):
                 gcode[int(st[2])] = int(st[5] + st[6])
             
-    # print("guessed",gcode)
     guess_codes.append(gcode)
     return gcode
